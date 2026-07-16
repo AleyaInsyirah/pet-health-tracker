@@ -1,10 +1,22 @@
 <?php
 include 'db_connect.php';
 
-$full_name = $_POST['full_name'];
-$email = $_POST['email'];
-$password = password_hash($_POST['password'], PASSWORD_DEFAULT); // encrypt password
-$phone_number = $_POST['phone_number'];
+$full_name = trim($_POST['full_name'] ?? '');
+$email = trim($_POST['email'] ?? '');
+$plain_password = $_POST['password'] ?? '';
+$phone_number = trim($_POST['phone_number'] ?? '');
+
+if ($full_name === '' || $email === '' || $plain_password === '' || $phone_number === '') {
+    echo json_encode(["success" => false, "message" => "Please complete all registration fields"]);
+    exit;
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["success" => false, "message" => "Please enter a valid email address"]);
+    exit;
+}
+
+$password = password_hash($plain_password, PASSWORD_DEFAULT);
 
 $sql = "INSERT INTO users (username, email, password, phone_number) VALUES (?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
